@@ -1,4 +1,4 @@
-package midware
+package middleware
 
 import (
 	"github.com/anyufly/gin_session"
