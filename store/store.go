@@ -28,19 +28,14 @@ func ReadCookieByRequest(request *http.Request, name string) (string, bool, erro
 		return queryArray[0], true, nil
 	} else {
 		// 若还是读不到，尝试从body中读取
-		body, err := request.GetBody()
+		if oldBody := request.Body; oldBody != nil && request.Header.Get("Content-Type") == "application/json" {
 
-		if err != nil {
-			return "", false, err
-		}
+			bodyBytes, err := io.ReadAll(oldBody)
 
-		if body != nil && request.Header.Get("Content-Type") == "application/json" {
-
-			defer func() {
-				_ = body.Close()
-			}()
-
-			bodyBytes, err := io.ReadAll(body)
+			defer func(bodyBytes []byte) {
+				request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+				_ = oldBody.Close()
+			}(bodyBytes)
 
 			if err != nil {
 				return "", false, err
