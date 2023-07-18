@@ -33,7 +33,9 @@ func ReadCookieByRequest(request *http.Request, name string) (string, bool, erro
 			bodyBytes, err := io.ReadAll(oldBody)
 
 			defer func(bodyBytes []byte) {
-				request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+				newRequest := *request
+				newRequest.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+				*request = newRequest
 				_ = oldBody.Close()
 			}(bodyBytes)
 
